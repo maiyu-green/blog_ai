@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Android架构15年演进之路</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #0a0e27;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            display: none;
+            padding: 60px 80px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            flex-direction: column;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f4d 50%, #0f1535 100%);
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        /* 装饰元素 */
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(0,188,212,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .slide::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(26,35,126,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        /* 网格装饰 */
+        .grid-decoration {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                linear-gradient(rgba(0,188,212,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,188,212,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+        }
+
+        /* ===== P1 封面 ===== */
+        .cover-slide {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .android-icon {
+            font-size: 120px;
+            margin-bottom: 40px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .cover-title {
+            font-size: 72px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00bcd4 0%, #4fc3f7 50%, #00bcd4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+        }
+
+        .cover-subtitle {
+            font-size: 36px;
+            color: #8b9dc3;
+            margin-bottom: 60px;
+        }
+
+        .cover-meta {
+            display: flex;
+            gap: 40px;
+            font-size: 20px;
+            color: #5c6bc0;
+        }
+
+        .cover-meta span {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .timeline-decoration {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .timeline-dot {
+            width: 16px;
+            height: 16px;
+            background: #00bcd4;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(0,188,212,0.5);
+        }
+
+        .timeline-line {
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, #00bcd4, transparent);
+        }
+
+        /* ===== 内容页通用 ===== */
+        .content-slide {
+            z-index: 1;
+        }
+
+        .slide-header {
+            margin-bottom: 50px;
+        }
+
+        .slide-number {
+            font-size: 16px;
+            color: #00bcd4;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .slide-title {
+            font-size: 48px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        /* ===== P2 目录 ===== */
+        .toc-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            flex: 1;
+        }
+
+        .toc-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(0,188,212,0.2);
+            border-radius: 20px;
+            padding: 35px;
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .toc-item:hover {
+            background: rgba(0,188,212,0.05);
+            border-color: rgba(0,188,212,0.4);
+            transform: translateX(10px);
+        }
+
+        .toc-icon {
+            font-size: 40px;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(0,188,212,0.2) 0%, rgba(0,188,212,0.05) 100%);
+            border-radius: 20px;
+        }
+
+        .toc-content h3 {
+            font-size: 26px;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .toc-content p {
+            font-size: 16px;
+            color: #8b9dc3;
+        }
+
+        /* ===== P3 演进概览 ===== */
+        .overview-content {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .core-goals {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+        }
+
+        .goal-card {
+            background: linear-gradient(135deg, rgba(0,188,212,0.15) 0%, rgba(0,188,212,0.05) 100%);
+            border: 1px solid rgba(0,188,212,0.3);
+            border-radius: 20px;
+            padding: 40px 50px;
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .goal-card .icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .goal-card h3 {
+            font-size: 28px;
+            color: #00bcd4;
+            margin-bottom: 10px;
+        }
+
+        .evolution-path {
+            background: rgba(255,255,255,0.03);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .evolution-path h3 {
+            font-size: 24px;
+            color: #8b9dc3;
+            margin-bottom: 20px;
+        }
+
+        .path-arrow {
+            font-size: 36px;
+            color: #00bcd4;
+            margin: 0 20px;
+        }
+
+        .path-text {
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .path-text .from {
+            color: #ff6b6b;
+        }
+
+        .path-text .to {
+            color: #4ecdc4;
+        }
+
+        /* ===== P4-6 阶段展示 ===== */
+        .phases-container {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            flex: 1;
+        }
+
+        .phase-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .phase-card {
+            flex: 1;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(0,188,212,0.2);
+            border-radius: 16px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .phase-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #00bcd4, #1a237e);
+        }
+
+        .phase-card.highlight {
+            background: linear-gradient(135deg, rgba(0,188,212,0.1) 0%, rgba(0,188,212,0.02) 100%);
+            border-color: rgba(0,188,212,0.4);
+        }
+
+        .phase-period {
+            font-size: 14px;
+            color: #00bcd4;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .phase-name {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .phase-desc {
+            font-size: 15px;
+            color: #8b9dc3;
+            line-height: 1.6;
+        }
+
+        .phase-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #ff6b6b;
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* ===== P6 现代架构 ===== */
+        .modern-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            flex: 1;
+        }
+
+        .modern-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(0,188,212,0.2);
+            border-radius: 20px;
+            padding: 35px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .modern-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0,188,212,0.4);
+            box-shadow: 0 10px 40px rgba(0,188,212,0.1);
+        }
+
+        .modern-card.featured {
+            grid-column: span 3;
+            background: linear-gradient(135deg, rgba(0,188,212,0.15) 0%, rgba(0,188,212,0.05) 100%);
+            border-color: rgba(0,188,212,0.4);
+        }
+
+        .modern-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .modern-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+
+        .modern-desc {
+            font-size: 16px;
+            color: #8b9dc3;
+        }
+
+        /* ===== P7 选型建议 ===== */
+        .recommendation-content {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .recommendation-row {
+            display: flex;
+            gap: 30px;
+        }
+
+        .recommendation-card {
+            flex: 1;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(0,188,212,0.2);
+            border-radius: 24px;
+            padding: 40px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .recommendation-card.small {
+            background: linear-gradient(135deg, rgba(76,175,80,0.1) 0%, rgba(76,175,80,0.02) 100%);
+            border-color: rgba(76,175,80,0.3);
+        }
+
+        .recommendation-card.large {
+            background: linear-gradient(135deg, rgba(0,188,212,0.1) 0%, rgba(0,188,212,0.02) 100%);
+            border-color: rgba(0,188,212,0.3);
+        }
+
+        .rec-icon {
+            font-size: 60px;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.05);
+            border-radius: 24px;
+        }
+
+        .rec-content {
+            flex: 1;
+        }
+
+        .rec-label {
+            font-size: 18px;
+            color: #8b9dc3;
+            margin-bottom: 10px;
+        }
+
+        .rec-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .rec-desc {
+            font-size: 18px;
+            color: #8b9dc3;
+        }
+
+        .principles-section {
+            background: rgba(255,255,255,0.03);
+            border-radius: 20px;
+            padding: 35px;
+            text-align: center;
+        }
+
+        .principles-title {
+            font-size: 20px;
+            color: #8b9dc3;
+            margin-bottom: 25px;
+        }
+
+        .principles-tags {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .principle-tag {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+            color: #fff;
+            padding: 15px 35px;
+            border-radius: 30px;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        /* ===== P8 结束页 ===== */
+        .ending-slide {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .ending-icon {
+            font-size: 100px;
+            margin-bottom: 40px;
+        }
+
+        .ending-title {
+            font-size: 56px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #00bcd4 0%, #4fc3f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .ending-subtitle {
+            font-size: 28px;
+            color: #8b9dc3;
+            margin-bottom: 60px;
+        }
+
+        .ending-cta {
+            display: flex;
+            gap: 30px;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, #00bcd4 0%, #008ba3 100%);
+            color: #fff;
+            padding: 20px 50px;
+            border-radius: 50px;
+            font-size: 22px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cta-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 40px rgba(0,188,212,0.3);
+        }
+
+        .cta-button.secondary {
+            background: transparent;
+            border: 2px solid #00bcd4;
+        }
+
+        /* 导航提示 */
+        .nav-hint {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+            background: rgba(0,0,0,0.5);
+            padding: 15px 30px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-dot.active {
+            background: #00bcd4;
+            box-shadow: 0 0 10px rgba(0,188,212,0.5);
+        }
+
+        .nav-hint-text {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255,255,255,0.5);
+            font-size: 14px;
+            z-index: 100;
+        }
+
+        /* 进度条 */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #00bcd4, #4fc3f7);
+            transition: width 0.3s ease;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar"></div>
+
+    <div class="presentation">
+        <!-- P1 封面 -->
+        <div class="slide cover-slide active">
+            <div class="grid-decoration"></div>
+            <div class="android-icon">🤖</div>
+            <h1 class="cover-title">Android 架构 15 年演进之路</h1>
+            <p class="cover-subtitle">7个阶段的完整梳理 · 从混乱到规范</p>
+            <div class="cover-meta">
+                <span>📅 2010 - 2025</span>
+                <span>📱 7个演进阶段</span>
+                <span>🎯 解耦 · 可维护 · 可测试</span>
+            </div>
+            <div class="timeline-decoration">
+                <div class="timeline-dot"></div>
+                <div class="timeline-line"></div>
+                <div class="timeline-dot"></div>
+                <div class="timeline-line"></div>
+                <div class="timeline-dot"></div>
+            </div>
+        </div>
+
+        <!-- P2 目录 -->
+        <div class="slide content-slide">
+            <div class="grid-decoration"></div>
+            <div class="slide-header">
+                <div class="slide-number">Contents</div>
+                <h2 class="slide-title">目录</h2>
+            </div>
+            <div class="toc-grid">
+                <div class="toc-item">
+                    <div class="toc-icon">📊</div>
+                    <div class="toc-content">
+                        <h3>演进概览</h3>
+                        <p>核心目标与演进路径</p>
+                    </div>
+                </div>
+                <div class="toc-item">
+                    <div class="toc-icon">📜</div>
+                    <div class="toc-content">
+                        <h3>7个阶段详解</h3>
+                        <p>从2010到2025的完整历程</p>
+                    </div>
+                </div>
+                <div class="toc-item">
+                    <div class="toc-icon">⚖️</div>
+                    <div class="toc-content">
+                        <h3>架构对比</h3>
+                        <p>各阶段优缺点分析</p>
+                    </div>
+                </div>
+                <div class="toc-item">
+                    <div class="toc-icon">🚀</div>
+                    <div class="toc-content">
+                        <h3>现代架构核心</h3>
+                        <p>当前主流技术栈</p>
+                    </div>
+                </div>
+                <div class="toc-item">
+                    <div class="toc-icon">💡</div>
+                    <div class="toc-content">
+                        <h3>选型建议</h3>
+                        <p>如何选择适合的架构</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- P3 演进概览 -->
+        <div class="slide content-slide">
+            <div class="grid-decoration"></div>
+            <div class="slide-header">
+                <div class="slide-number">Overview</div>
+                <h2 class="slide-title">演进概览</h2>
+            </div>
+            <div class="overview-content">
+                <div class="core-goals">
+                    <div class="goal-card">
+                        <div class="icon">🔗</div>
+                        <h3>解耦</h3>
+                    </div>
+                    <div class="goal-card">
+                        <div class="icon">🛠️</div>
+                        <h3>可维护</h3>
+                    </div>
+                    <div class="goal-card">
+                        <div class="icon">🧪</div>
+                        <h3>可测试</h3>
+                    </div>
+                </div>
+                <div class="evolution-path">
+                    <h3>演进路径</h3>
+                    <div style="display: flex; align-items: center; justify-content: center; margin-top: 20px;">
+                        <span class="path-text from">代码堆砌</span>
+                        <span class="path-arrow">→</span>
+                        <span class="path-text to">规范化设计</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- P4 早期阶段 -->
+        <div class="slide content-slide">
+            <div class="grid-decoration"></div>
+            <div class="slide-header">
+                <div class="slide-number">Phase 1-3</div>
+                <h2 class="slide-title">早期阶段 (2010-2017)</h2>
+            </div>
+            <div class="phases-container">
+                <div class="phase-row">
+                    <div class="phase-card highlight">
+                        <span class="phase-badge">蛮荒期</span>
+                        <div class="phase-period">2010 - 2013</div>
+                        <div class="phase-name">无架构时代</div>
+                        <div class="phase-desc">Activity塞所有逻辑，上千行万能类，无法单元测试，生命周期Bug频发</div>
+                    </div>
+                </div>
+                <div class="phase-row">
+                    <div class="phase-card">
+                        <div class="phase-period">2013 - 2016</div>
+                        <div class="phase-name">MVP 时代</div>
+                        <div class="phase-desc">关注点分离，Activity瘦身，Presenter可独立测试，但易内存泄漏</div>
+                    </div>
+                    <div class="phase-card">
+                        <div class="phase-period">2014 - 2017</div>
+                        <div class="phase-name">Clean Architecture</div>
+                        <div class="phase-desc">业务与框架解耦，引入Domain层和UseCase，复用性强但开发成本高</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- P5 中期阶段 -->
+        <div class="slide content-slide">
+            <div class="grid-decoration"></div>
+            <div class="slide-header">
+                <div class="slide-number">Phase 4-6</div>
+                <h2 class="slide-title">中期阶段 (2016-2022)</h2>
+            </div>
+            <div class="phases-container">
+                <div class="phase-row">
+                    <div class="phase-card">
+                        <div class="phase-period">2016 - 2019</div>
+                        <div class="phase-name">MVVM + AAC</div>
+                        <div class="phase-desc">生命周期感知，响应式绑定，数据统一，Repository模式普及</div>
+                    </div>
+                    <div class="phase-card">
+                        <div class="phase-period">2017 - 2020</div>
+                        <div class="phase-name">RxJava 单向流</div>
+                        <div class="phase-desc">异步逻辑简洁，数据流可控，但学习成本高，代码易晦涩</div>
+                    </div>
+                </div>
+                <div class="phase-row">
+                    <div class="phase-card highlight">
+                        <span class="phase-badge">Kotlin</span>
+                        <div class="phase-period">2019 - 2022</div>
+                        <div class="phase-name">Coroutines + Flow</div>
+                        <div class="phase-desc">异步代码简洁，背压友好，状态可控，成为主流中小到中大型App首选</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- P6 现代架构 -->
+        <div class="slide content-slide">
+            <div class="grid-decoration"></div>
+            <div class="slide-header">
+                <div class="slide-number">Phase 7</div>
+                <h2 class="slide-title">现代架构 (2020-2025)</h2>
+            </div>
+            <div class="modern-grid">
+                <div class="modern-card">
+                    <div class="modern-icon">🔄</div>
+                    <div class="modern-title">MVVM</div>
+                    <div class="modern-desc">生命周期感知</div>
+                </div>
+                <div class="modern-card">
+                    <div class="modern-icon">📦</div>
+                    <div class="modern-title">Repository</div>
+                    <div class="modern-desc">数据统一入口</div>
+                </div>
+                <div class="modern-card">
+                    <div class="modern-icon">〰️</div>
+                    <div class="modern-title">Coroutines/Flow</div>
+                    <div class="modern-desc">简洁异步处理</div>
+                </div>
+                <div class="modern-card">
+                    <div class="modern-icon">➡️</div>
+                    <div class="modern-title">MVI</div>
+                    <div class="modern-desc">单向数据流</div>
+                </div>
+                <div class="modern-card">
+                    <div class="modern-icon">🎨</div>
+                    <div class="modern-title">Jetpack Compose</div>
+                    <div class="modern-desc">声明式UI</div>
+                </div>
+                <div class="modern-card featured">
+                    <div class="modern-icon">🚀</div>
+                    <div class="modern-title">MVI + Jetpack Compose + 状态机</div>
+                    <div class="modern-desc">状态可预测 · 声明式UI高效 · 测试友好 · 2020-2025 大型复杂App首选</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- P7 选型建议 -->
+        <div class="slide content-slide">
+            <div class="grid-decoration"></div>
+            <div class="slide-header">
+                <div class="slide-number">Recommendation</div>
+                <h2 class="slide-title">架构选型建议</h2>
+            </div>
+            <div class="recommendation-content">
+                <div class="recommendation-row">
+                    <div class="recommendation-card small">
+                        <div class="rec-icon">📦</div>
+                        <div class="rec-content">
+                            <div class="rec-label">小型项目</div>
+                            <div class="rec-title">MVVM + AAC</div>
+                            <div class="rec-desc">快速开发，足够用</div>
+                        </div>
+                    </div>
+                    <div class="recommendation-card large">
+                        <div class="rec-icon">🏢</div>
+                        <div class="rec-content">
+                            <div class="rec-label">中大型项目</div>
+                            <div class="rec-title">MVI + Compose</div>
+                            <div class="rec-desc">状态可控，可维护性强</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="principles-section">
+                    <div class="principles-title">核心原则</div>
+                    <div class="principles-tags">
+                        <span class="principle-tag">🔗 解耦</span>
+                        <span class="principle-tag">🛠️ 可维护</span>
+                        <span class="principle-tag">🧪 可测试</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- P8 结束页 -->
+        <div class="slide ending-slide">
+            <div class="grid-decoration"></div>
+            <div class="ending-icon">🎉</div>
+            <h2 class="ending-title">感谢观看</h2>
+            <p class="ending-subtitle">Android架构演进 · 15年沉淀的智慧</p>
+            <div class="ending-cta">
+                <button class="cta-button">📌 收藏备用</button>
+                <button class="cta-button secondary">💬 交流讨论</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-hint-text">使用 ← → 方向键或点击圆点切换页面</div>
+    <div class="nav-hint" id="navHint"></div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const navHint = document.getElementById('navHint');
+        const progressBar = document.getElementById('progressBar');
+        let currentSlide = 0;
+
+        // 创建导航点
+        slides.forEach((_, index) => {
+            const dot = document.createElement('div');
+            dot.className = 'nav-dot' + (index === 0 ? ' active' : '');
+            dot.addEventListener('click', () => goToSlide(index));
+            navHint.appendChild(dot);
+        });
+
+        const dots = document.querySelectorAll('.nav-dot');
+
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === currentSlide);
+            });
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentSlide);
+            });
+            progressBar.style.width = ((currentSlide + 1) / slides.length * 100) + '%';
+        }
+
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) {
+                currentSlide++;
+                updateSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateSlide();
+        }
+
+        // 键盘导航
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            }
+        });
+
+        // 触摸滑动支持
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    nextSlide();
+                } else {
+                    prevSlide();
+                }
+            }
+        }
+
+        // 初始化
+        updateSlide();
+    </script>
+</body>
+</html>
