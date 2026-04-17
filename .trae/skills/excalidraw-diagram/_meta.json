@@ -1,0 +1,15 @@
+{
+  "name": "excalidraw-diagram",
+  "version": "1.0.0",
+  "description": "Generate hand-drawn style diagrams using Excalidraw format",
+  "author": "coleam00",
+  "source": "https://github.com/coleam00/excalidraw-diagram-skill",
+  "tags": ["diagram", "excalidraw", "visualization", "sketch", "drawing"],
+  "capabilities": [
+    "flowchart",
+    "mindmap",
+    "architecture",
+    "uml",
+    "wireframe"
+  ]
+}

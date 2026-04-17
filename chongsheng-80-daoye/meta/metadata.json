@@ -1,0 +1,22 @@
+{
+  "project": {
+    "title": "chongsheng-80-daoye",
+    "version": "v0.1",
+    "phase": 0,
+    "lastUpdated": "2026-04-17"
+  },
+  "writingProgress": {
+    "currentChapter": 0,
+    "lastCompletedChapter": 0,
+    "autoAdvance": {
+      "enabled": false,
+      "remaining": 0,
+      "totalRequested": 0,
+      "currentChapter": 0,
+      "intervalSeconds": 6,
+      "autoConfirm": false,
+      "status": "idle"
+    }
+  },
+  "chapters": {}
+}

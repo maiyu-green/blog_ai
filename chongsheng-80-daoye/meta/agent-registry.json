@@ -1,0 +1,107 @@
+{
+  "projectId": "chongsheng-80-daoye",
+  "projectTitle": "chongsheng-80-daoye",
+  "registeredAgents": {
+    "worldbuilder": {
+      "id": "worldbuilder",
+      "name": "世界观构建",
+      "model": "provider/model-id",
+      "status": "available",
+      "registeredAt": "2026-04-17",
+      "lastUsed": "",
+      "taskCount": 0
+    },
+    "characterDesigner": {
+      "id": "characterDesigner",
+      "name": "角色设计",
+      "model": "provider/model-id",
+      "status": "available",
+      "registeredAt": "2026-04-17",
+      "lastUsed": "",
+      "taskCount": 0
+    },
+    "outlinePlanner": {
+      "id": "outlinePlanner",
+      "name": "大纲规划",
+      "model": "provider/model-id",
+      "status": "available",
+      "registeredAt": "2026-04-17",
+      "lastUsed": "",
+      "taskCount": 0
+    },
+    "chapterOutliner": {
+      "id": "chapterOutliner",
+      "name": "章节细纲",
+      "model": "provider/model-id",
+      "status": "available",
+      "registeredAt": "2026-04-17",
+      "lastUsed": "",
+      "taskCount": 0
+    },
+    "mainWriter": {
+      "id": "mainWriter",
+      "name": "主笔",
+      "model": "provider/model-id",
+      "status": "available",
+      "registeredAt": "2026-04-17",
+      "lastUsed": "",
+      "taskCount": 0
+    },
+    "oocGuardian": {
+      "id": "oocGuardian",
+      "name": "OOC守护",
+      "model": "provider/model-id",
+      "status": "available",
+      "registeredAt": "2026-04-17",
+      "lastUsed": "",
+      "taskCount": 0
+    },
+    "battleAgent": {
+      "id": "battleAgent",
+      "name": "战斗写作",
+      "model": "provider/model-id",
+      "status": "available",
+      "registeredAt": "2026-04-17",
+      "lastUsed": "",
+      "taskCount": 0
+    },
+    "finalReviewer": {
+      "id": "finalReviewer",
+      "name": "终稿审核",
+      "model": "provider/model-id",
+      "status": "available",
+      "registeredAt": "2026-04-17",
+      "lastUsed": "",
+      "taskCount": 0
+    },
+    "readerSimulator": {
+      "id": "readerSimulator",
+      "name": "读者模拟",
+      "model": "provider/model-id",
+      "status": "available",
+      "registeredAt": "2026-04-17",
+      "lastUsed": "",
+      "taskCount": 0
+    },
+    "styleAnchorGenerator": {
+      "id": "styleAnchorGenerator",
+      "name": "风格锚定生成",
+      "model": "provider/model-id",
+      "status": "available",
+      "registeredAt": "2026-04-17",
+      "lastUsed": "",
+      "taskCount": 0
+    },
+    "rollingSummarizer": {
+      "id": "rollingSummarizer",
+      "name": "滚动摘要",
+      "model": "provider/model-id",
+      "status": "available",
+      "registeredAt": "2026-04-17",
+      "lastUsed": "",
+      "taskCount": 0
+    }
+  },
+  "version": "v1.0",
+  "createdAt": "2026-04-17"
+}
